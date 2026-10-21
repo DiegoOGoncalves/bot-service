@@ -30,7 +30,7 @@ bot-service/
   - `app.ts`: Responsável pela montagem de middlewares (CORS, JSON parser), injeção de rotas e tratamento global de erros.
   - `routes/`: Mapeamento de endpoints REST (ex.: `/api/health`).
   - `middlewares/`: Manipuladores de requisições, tratamento de erros 404 e 500.
-- **Porta**: Configurável pela variável de ambiente `PORT` (padrão: `3001`).
+- **Porta e CORS**: Configurável pelas variáveis de ambiente `PORT` (padrão: `3001`) e `CORS_ORIGIN` (padrão de desenvolvimento: `http://localhost:5173`). Em ambiente de produção, `CORS_ORIGIN` deve conter a origem pública real do frontend (ex.: `https://app.meudominio.com`).
 
 ### 3.2. Frontend Web (`apps/web`)
 - **Tecnologias**: React, TypeScript, Vite.
@@ -41,4 +41,5 @@ bot-service/
 ## 4. Integração Contínua (CI)
 Configurada via GitHub Actions em `.github/workflows/ci.yml`. Executa em pushes e pull requests para a branch `main`:
 1. Instalação determinística de dependências a partir do lockfile (`npm ci`).
-2. Validação de tipagem e compilação do backend e frontend (`npm run build`).
+2. Execução da suíte de testes automatizados da API (`npm test`).
+3. Validação de tipagem e compilação de produção (`npm run build`).

@@ -8,10 +8,10 @@ export function createApp(): Application {
 
   const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
 
+  // CORS simplificado para o MVP (sem credenciais por cookies)
   app.use(
     cors({
-      origin: allowedOrigin === '*' ? '*' : [allowedOrigin],
-      credentials: true,
+      origin: allowedOrigin,
     })
   );
 

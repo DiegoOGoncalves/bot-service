@@ -8,20 +8,55 @@ export function notFoundHandler(req: Request, res: Response, _next: NextFunction
   });
 }
 
+interface HttpError extends Error {
+  status?: number;
+  statusCode?: number;
+  type?: string;
+  body?: unknown;
+}
+
 export function errorHandler(
-  err: Error,
+  err: HttpError,
   _req: Request,
   res: Response,
   _next: NextFunction
 ): void {
-  console.error('[API Error]:', err);
+  // Identifica erro de parsing de JSON do Express/body-parser
+  const isMalformedJson =
+    (err instanceof SyntaxError && 'body' in err) || err.type === 'entity.parse.failed';
 
-  const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
+  // Preserva código HTTP válido de erros conhecidos ou usa 500 como fallback
+  let statusCode = 500;
+  if (isMalformedJson) {
+    statusCode = 400;
+  } else if (typeof err.statusCode === 'number' && err.statusCode >= 400 && err.statusCode <= 599) {
+    statusCode = err.statusCode;
+  } else if (typeof err.status === 'number' && err.status >= 400 && err.status <= 599) {
+    statusCode = err.status;
+  } else if (res.statusCode >= 400 && res.statusCode <= 599) {
+    statusCode = res.statusCode;
+  }
+
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  // Mensagem segura: em produção, não expõe detalhes de erros 500
+  let message: string;
+  if (isMalformedJson) {
+    message = 'JSON malformado no corpo da requisição';
+  } else if (isProduction && statusCode >= 500) {
+    message = 'Erro interno do servidor';
+  } else {
+    message = err.message || 'Erro interno do servidor';
+  }
+
+  if (process.env.NODE_ENV !== 'test') {
+    console.error(`[API Error] ${statusCode} - ${err.message}`);
+  }
 
   res.status(statusCode).json({
     status: 'error',
     statusCode,
-    message: err.message || 'Erro interno do servidor',
-    ...(process.env.NODE_ENV === 'development' ? { stack: err.stack } : {}),
+    message,
+    ...(!isProduction && err.stack ? { stack: err.stack } : {}),
   });
 }
