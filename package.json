@@ -1,0 +1,25 @@
+{
+  "name": "bot-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Monorepo da plataforma Bot Service para configuração e simulação de chatbots",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n \"API,WEB\" -c \"blue,green\" \"npm run dev --workspace=@bot-service/api\" \"npm run dev --workspace=@bot-service/web\"",
+    "dev:api": "npm run dev --workspace=@bot-service/api",
+    "dev:web": "npm run dev --workspace=@bot-service/web",
+    "build": "npm run build --workspace=@bot-service/api && npm run build --workspace=@bot-service/web",
+    "build:api": "npm run build --workspace=@bot-service/api",
+    "build:web": "npm run build --workspace=@bot-service/web",
+    "start:api": "npm run start --workspace=@bot-service/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}
